@@ -68,14 +68,20 @@ const addQuestion = async (req, res) => {
 
   
 const questions = async (req, res) => {
-    const {page} = req.params;
+    const {page,userId} = req.params;
     if(page && page < 1){
       res.status(400).json({message:'invalid page number'});
       return;
     }
     // 1 -> 0 - 5
     // 2 -> 5 - 10
-    const getQuestionsQuery = `SELECT q.question_id as questionId, ul.username AS authorUsername,up.name as authorName,up.profile_picture as authorImage,q.title AS title,q.body AS summery , q.tags AS tags,q.image AS image,q.up_votes as upVotes,q.down_votes as downVotes,q.creation_datetime as creation_datetime FROM questions q INNER JOIN user_login ul ON q.user_id = ul.id INNER JOIN user_profile up ON up.user_id=q.user_id ORDER BY q.creation_datetime DESC LIMIT ${(page-1)*5},5`;
+    let getQuestionsQuery="";
+    if(!userId){
+     getQuestionsQuery = `SELECT ul.id as userId,q.question_id as questionId, ul.username AS authorUsername,up.name as authorName,up.profile_picture as authorImage,q.title AS title,q.body AS summery , q.tags AS tags,q.image AS image,q.repo as repo,q.creation_datetime as creation_datetime FROM questions q INNER JOIN user_login ul ON q.user_id = ul.id INNER JOIN user_profile up ON up.user_id=q.user_id  ORDER BY q.creation_datetime DESC LIMIT ${(page-1)*5},5`;
+    }
+    else{
+     getQuestionsQuery = `SELECT ul.id as userId,q.question_id as questionId, ul.username AS authorUsername,up.name as authorName,up.profile_picture as authorImage,q.title AS title,q.body AS summery , q.tags AS tags,q.image AS image,q.repo as repo,q.creation_datetime as creation_datetime FROM questions q INNER JOIN user_login ul ON q.user_id = ul.id INNER JOIN user_profile up ON up.user_id=q.user_id  WHERE q.user_id='${userId}'  ORDER BY q.creation_datetime DESC `;
+    }
     const getQuestions= await executeQuery(getQuestionsQuery);
     if(getQuestions.length === 0){
       res.status(204).json({message:'no data exists'});
@@ -88,7 +94,7 @@ const questions = async (req, res) => {
 const question = async (req, res) => {
     const {questionTitle} = req.params;
     const titleHash = sha1(questionTitle);
-    const getQuestionQuery = `SELECT q.question_id as questionId, ul.username AS authorUsername,up.name as authorName,up.profile_picture as authorImage,q.title AS title,q.body AS summery , q.tags AS tags,q.image AS image,q.up_votes as upVotes,q.down_votes as downVotes,q.creation_datetime as creation_datetime FROM questions q INNER JOIN user_login ul ON q.user_id = ul.id INNER JOIN user_profile up ON up.user_id=q.user_id WHERE q.title_hash ='${titleHash}'`;
+    const getQuestionQuery = `SELECT q.question_id as questionId, ul.username AS authorUsername,up.name as authorName,up.profile_picture as authorImage,q.title AS title,q.body AS summery , q.tags AS tags,q.image AS image,q.repo as repo,q.creation_datetime as creation_datetime FROM questions q INNER JOIN user_login ul ON q.user_id = ul.id INNER JOIN user_profile up ON up.user_id=q.user_id WHERE q.title_hash ='${titleHash}'`;
     const getQuestion= await executeQuery(getQuestionQuery);
     if(getQuestion.length === 0){
       res.status(404).json({message:'not found'});

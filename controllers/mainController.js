@@ -92,30 +92,26 @@ const upVote = async (req, res) => {
         // do nothing
   // 3 case:
     // found with downvote.
-      // remove the downvote and add upvote.
+    // remove the downvote and add upvote.
 
-  const find = await executeQuery(`SELECT * FROM votes WHERE user_id ='${userId}'  and question_id ='${questionId}' LIMIT 1`);
+  const find = await executeQuery(`SELECT vote FROM votes WHERE user_id ='${userId}'  and question_id ='${questionId}' LIMIT 1`);
   // case 1:
   if(find.length == 0){
-    const updatingVote = await executeQuery(`INSERT INTO votes(user_id, question_id,up_vote) VALUES('${userId}','${questionId}','${1}')`);
-    const updateQuestionTable = await executeQuery(`UPDATE questions SET up_votes=up_votes+1 WHERE question_id='${questionId}'`);
+    const updatingVote = await executeQuery(`INSERT INTO votes(user_id,question_id,vote,type) VALUES('${userId}','${questionId}','${1}','Q')`);
+    const updateQuestionTable = await executeQuery(`UPDATE questions SET repo=repo+1 WHERE question_id='${questionId}'`);
   }
   // case 2:
-  else if(find[0].up_vote == 1){
+  else if(find[0].vote == 1){
       // do nothing.
   }
   // case 3:
-  else if(find[0].down_vote == 1){
-    const updatingVote = executeQuery(`UPDATE votes SET up_vote = '1' , down_vote='0' WHERE question_id = '${questionId}' AND user_id = '${userId}'`);
-    const updateQuestionTable = executeQuery(`UPDATE questions SET up_votes=up_votes+1,down_votes=down_votes-1 WHERE question_id='${questionId}'`);
+  else if(find[0].vote == -1){
+    const updatingVote = executeQuery(`UPDATE votes SET vote = '1' WHERE question_id = '${questionId}' AND user_id = '${userId}'`);
+    const updateQuestionTable = executeQuery(`UPDATE questions SET repo=repo+1 WHERE question_id='${questionId}'`);
   }
   
- const getCurrentUpVote =await executeQuery(`SELECT COUNT(up_vote) as upVote FROM votes WHERE question_id = '${questionId}' and up_vote='1'`);
- const getCurrentDownVotes = await executeQuery(`SELECT COUNT(down_vote) as downVote FROM votes WHERE question_id ='${questionId}' and down_vote='1'`); 
- const currentVote = {upVote:getCurrentUpVote[0].upVote,downVote:getCurrentDownVotes[0].downVote}; 
- res.status(200).json(currentVote);
-
-
+ const getCurrentRepo = await executeQuery(`SELECT repo FROM questions WHERE question_id ='${questionId}'`);
+ res.status(200).json(getCurrentRepo[0]);
 };
 
 //for downvote
@@ -136,29 +132,25 @@ const downVote = async (req, res) => {
       // found with downvote.
       // do nothing
 
-  const find = await executeQuery(`SELECT * FROM votes WHERE user_id ='${userId}'  and question_id ='${questionId}' LIMIT 1`);
+  const find = await executeQuery(`SELECT vote FROM votes WHERE user_id ='${userId}'  and question_id ='${questionId}' LIMIT 1`);
   // case 1:
   if(find.length == 0){
-    const updatingVote = await executeQuery(`INSERT INTO votes(user_id, question_id,down_vote) VALUES('${userId}','${questionId}','${1}')`);
-    const updateQuestionTable = await executeQuery(`UPDATE questions SET down_votes=down_votes+1 WHERE question_id='${questionId}'`);
+    const updatingVote = await executeQuery(`INSERT INTO votes(user_id, question_id,vote,type) VALUES('${userId}','${questionId}','${-1}','Q')`);
+    const updateQuestionTable = await executeQuery(`UPDATE questions SET repo=repo-1 WHERE question_id='${questionId}'`);
   }
   // case 2:
-  else if(find[0].up_vote == 1){
-    const updatingVote = await executeQuery(`UPDATE votes SET down_vote = '1' , up_vote='0' WHERE question_id = '${questionId}' AND user_id = '${userId}'`);
-    const updateQuestionTable = await executeQuery(`UPDATE questions SET down_votes=down_votes+1,up_votes=up_votes-1 WHERE question_id='${questionId}'`);
+  else if(find[0].vote == 1){
+    const updatingVote = await executeQuery(`UPDATE votes SET vote='-1' WHERE question_id = '${questionId}' AND user_id = '${userId}'`);
+    const updateQuestionTable = await executeQuery(`UPDATE questions SET repo=repo-1 WHERE question_id='${questionId}'`);
     // console.log('here');
   }
   // case 3:
-  else if(find[0].down_vote == 1){
+  else if(find[0].vote == -1){
     // do nothing.
   }
 
- const getCurrentUpVote =await executeQuery(`SELECT COUNT(up_vote) as upVote FROM votes WHERE question_id ='${questionId}' and up_vote=1`);
- const getCurrentDownVotes = await executeQuery(`SELECT COUNT(down_vote) as downVote FROM votes WHERE question_id ='${questionId}' and down_vote='1'`); 
- const currentVote = {upVote:getCurrentUpVote[0].upVote,downVote:getCurrentDownVotes[0].downVote}; 
- res.status(200).json(currentVote);
-
-
+ const getCurrentRepo = await executeQuery(`SELECT repo FROM questions WHERE question_id ='${questionId}'`);
+ res.status(200).json(getCurrentRepo[0]);
 };
 
 

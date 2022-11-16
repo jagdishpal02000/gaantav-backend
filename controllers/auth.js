@@ -38,7 +38,7 @@ const signup = async (req, res) => {
         // Saving updatingProfile
         const updateProfileQuery = `INSERT INTO user_profile (user_id,name) VALUES ('${userId[0].id}','${name}')`;
         const updateProfile = await executeQuery(updateProfileQuery);
-        message={accessToken};
+        message={accessToken,email};
       }
   
       res.status(status).json(message);
@@ -65,7 +65,7 @@ const signup = async (req, res) => {
       }
       else{
         const accessToken = findAccount[0].token;
-        res.status(200).json({accessToken});
+        res.status(200).json({accessToken,email});
       }
       
     } catch (error) {
