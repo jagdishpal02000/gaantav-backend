@@ -48,13 +48,13 @@ const addQuestion = async (req, res) => {
       }
       // splitting on space and -
       const titleHash = sha1(title.split(/(?:-| )+/).join(''));
-      console.log({
-        title,
-      summery,
-      tags,
-      imagePath,
-      titleHash,
-    });
+    //   console.log({
+    //     title,
+    //   summery,
+    //   tags,
+    //   imagePath,
+    //   titleHash,
+    // });
     const createQuestionQuery = `INSERT INTO questions (user_id,title,body,image,tags,title_hash) VALUES ('${userId}','${title}','${summery}','${imagePath}','${tags}','${titleHash}')`;
     const createQuestion = await executeQuery(createQuestionQuery);
     res.sendStatus(200);
