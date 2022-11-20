@@ -93,12 +93,13 @@ const upVote = async (req, res) => {
   // 3 case:
     // found with downvote.
     // remove the downvote and add upvote.
-
+  let currRepo=null;
   const find = await executeQuery(`SELECT vote FROM votes WHERE user_id ='${userId}'  and question_id ='${questionId}' LIMIT 1`);
   // case 1:
   if(find.length == 0){
     const updatingVote = await executeQuery(`INSERT INTO votes(user_id,question_id,vote,type) VALUES('${userId}','${questionId}','${1}','Q')`);
-    const updateQuestionTable = await executeQuery(`UPDATE questions SET repo=repo+1 WHERE question_id='${questionId}'`);
+    const updateQuestionTable = await executeQuery(`UPDATE questions SET repo=1 WHERE question_id='${questionId}'`);
+    // currRepo = await executeQuery(`SELECT repo FROM questions WHERE question_id ='${questionId}'`);
   }
   // case 2:
   else if(find[0].vote == 1){
@@ -106,12 +107,28 @@ const upVote = async (req, res) => {
   }
   // case 3:
   else if(find[0].vote == -1){
-    const updatingVote = executeQuery(`UPDATE votes SET vote = '1' WHERE question_id = '${questionId}' AND user_id = '${userId}'`);
-    const updateQuestionTable = executeQuery(`UPDATE questions SET repo=repo+1 WHERE question_id='${questionId}'`);
+    const updatingVote = await executeQuery(`UPDATE votes SET vote = '1' WHERE question_id = '${questionId}' AND user_id = '${userId}'`);
+    // const updateQuestionTable = await  executeQuery(`UPDATE questions SET repo = (CASE 
+    //                                                                   WHEN repo = -1 
+    //                                                                   THEN 1 
+    //                                                                   ELSE repo+1
+    //                                                                   END)
+    //                                                                    WHERE question_id='${questionId}'`);
+    currRepo = await executeQuery(`SELECT repo FROM questions WHERE question_id ='${questionId}'`);
+    if(currRepo[0].repo == -1) {
+      const updateQuestionTable = await  executeQuery(`UPDATE questions SET repo = 1 WHERE question_id='${questionId}'`);
+      currRepo[0].repo = 1;
+    }
+    else {
+      const updateQuestionTable = await  executeQuery(`UPDATE questions SET repo = repo+1 WHERE question_id='${questionId}'`);
+      currRepo[0].repo += 1;
+    }
+    
   }
   
- const getCurrentRepo = await executeQuery(`SELECT repo FROM questions WHERE question_id ='${questionId}'`);
- res.status(200).json(getCurrentRepo[0]);
+  if(!currRepo) currRepo = await executeQuery(`SELECT repo FROM questions WHERE question_id ='${questionId}'`);
+//  const getCurrentRepo = await executeQuery(`SELECT repo FROM questions WHERE question_id ='${questionId}'`);
+res.status(200).json(currRepo[0]);
 };
 
 //for downvote
@@ -131,7 +148,7 @@ const downVote = async (req, res) => {
   // 3 case:
       // found with downvote.
       // do nothing
-
+  let currRepo=null;
   const find = await executeQuery(`SELECT vote FROM votes WHERE user_id ='${userId}'  and question_id ='${questionId}' LIMIT 1`);
   // case 1:
   if(find.length == 0){
@@ -141,16 +158,37 @@ const downVote = async (req, res) => {
   // case 2:
   else if(find[0].vote == 1){
     const updatingVote = await executeQuery(`UPDATE votes SET vote='-1' WHERE question_id = '${questionId}' AND user_id = '${userId}'`);
-    const updateQuestionTable = await executeQuery(`UPDATE questions SET repo=repo-1 WHERE question_id='${questionId}'`);
-    // console.log('here');
+    // const updateQuestionTable = await executeQuery(`UPDATE questions SET repo=
+    //                                                                   (
+    //                                                                   CASE 
+    //                                                                     WHEN repo=1
+    //                                                                     THEN -1
+    //                                                                     ELSE 
+    //                                                                     repo-1
+    //                                                                     END 
+    //                                                                   )
+    
+    //                                                                 WHERE question_id='${questionId}'`);
+    currRepo = await executeQuery(`SELECT repo FROM questions WHERE question_id ='${questionId}'`);
+    if(currRepo[0].repo == 1) {
+      const updateQuestionTable = await  executeQuery(`UPDATE questions SET repo = -1 WHERE question_id='${questionId}'`);
+      currRepo[0].repo = -1;
+    }
+    else {
+      const updateQuestionTable = await  executeQuery(`UPDATE questions SET repo = repo-1 WHERE question_id='${questionId}'`);
+      currRepo[0].repo -= 1;
+    }
+  
   }
   // case 3:
   else if(find[0].vote == -1){
     // do nothing.
   }
 
- const getCurrentRepo = await executeQuery(`SELECT repo FROM questions WHERE question_id ='${questionId}'`);
- res.status(200).json(getCurrentRepo[0]);
+  if(!currRepo)
+      currRepo = await executeQuery(`SELECT repo FROM questions WHERE question_id ='${questionId}'`);
+//  const getCurrentRepo = await executeQuery(`SELECT repo FROM questions WHERE question_id ='${questionId}'`);
+ res.status(200).json(currRepo[0]);
 };
 
 

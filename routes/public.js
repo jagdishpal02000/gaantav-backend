@@ -1,6 +1,6 @@
 const express = require("express");
 const publicRoutes = express.Router();
-const {questions,question} = require('../controllers/question');
+const {questions,question,searchQuestions} = require('../controllers/question');
 const {answers} = require('../controllers/answer');
 const {userProfile} = require('../controllers/user');
 const {
@@ -10,6 +10,7 @@ const {
 
 //all users
 // publicRoutes.route("/posts").get(posts);
+publicRoutes.route("/search-questions/:query").get(searchQuestions);
 publicRoutes.route("/questions/:page/:userId").get(questions);
 publicRoutes.route("/questions/:page").get(questions);
 publicRoutes.route("/questions").get(questions);

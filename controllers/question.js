@@ -48,13 +48,6 @@ const addQuestion = async (req, res) => {
       }
       // splitting on space and -
       const titleHash = sha1(title.split(/(?:-| )+/).join(''));
-    //   console.log({
-    //     title,
-    //   summery,
-    //   tags,
-    //   imagePath,
-    //   titleHash,
-    // });
     const createQuestionQuery = `INSERT INTO questions (user_id,title,body,image,tags,title_hash) VALUES ('${userId}','${title}','${summery}','${imagePath}','${tags}','${titleHash}')`;
     const createQuestion = await executeQuery(createQuestionQuery);
     res.sendStatus(200);
@@ -65,8 +58,6 @@ const addQuestion = async (req, res) => {
   };
   
 
-
-  
 const questions = async (req, res) => {
     const {page,userId} = req.params;
     if(page && page < 1){
@@ -103,8 +94,25 @@ const question = async (req, res) => {
     res.json(getQuestion);
   }
 
+const searchQuestions = async (req, res) => {
+    const {query} = req.params;
+    if(query.length >=3 ){
+    const getQuestionQuery = `SELECT q.question_id as questionId, ul.username AS authorUsername,up.name as authorName,up.profile_picture as authorImage,q.title AS title,q.body AS summery , q.tags AS tags,q.image AS image,q.repo as repo,q.creation_datetime as creation_datetime FROM questions q INNER JOIN user_login ul ON q.user_id = ul.id INNER JOIN user_profile up ON up.user_id=q.user_id WHERE q.title LIKE '%${query}%'`;
+    const getQuestion= await executeQuery(getQuestionQuery);
+    if(getQuestion.length === 0){
+      res.json([]);
+      return;
+    }
+    res.json(getQuestion);
+  }else{
+      res.status(404).json({message:'query string must be greater than 3 char'});
+      return;
+  }
+
+  }
 
 
-module.exports = {addQuestion,questions,question};
+
+module.exports = {addQuestion,questions,question,searchQuestions};
   
   
