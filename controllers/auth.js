@@ -12,6 +12,7 @@ const signup = async (req, res) => {
       // have to add checks for name,email and password and needs to add more fields.
       const checkQuery = `SELECT * FROM user_login WHERE email = '${email}' LIMIT 1`;
       const checkResult = await executeQuery(checkQuery);
+      const defaultProfile = "https://i.ibb.co/Vpm686k/Screenshot-2022-11-21-164008.jpg";
       console.log(checkResult);
       if (checkResult.length !== 0) {
         flag = false;
@@ -36,7 +37,7 @@ const signup = async (req, res) => {
         const saveToken = await executeQuery(saveTokenQuery);
   
         // Saving updatingProfile
-        const updateProfileQuery = `INSERT INTO user_profile (user_id,name) VALUES ('${userId[0].id}','${name}')`;
+        const updateProfileQuery = `INSERT INTO user_profile (user_id,name,profile_picture) VALUES ('${userId[0].id}','${name}','${defaultProfile}')`;
         const updateProfile = await executeQuery(updateProfileQuery);
         message={accessToken,email};
       }

@@ -97,7 +97,7 @@ const question = async (req, res) => {
 const searchQuestions = async (req, res) => {
     const {query} = req.params;
     if(query.length >=3 ){
-    const getQuestionQuery = `SELECT q.question_id as questionId, ul.username AS authorUsername,up.name as authorName,up.profile_picture as authorImage,q.title AS title,q.body AS summery , q.tags AS tags,q.image AS image,q.repo as repo,q.creation_datetime as creation_datetime FROM questions q INNER JOIN user_login ul ON q.user_id = ul.id INNER JOIN user_profile up ON up.user_id=q.user_id WHERE q.title LIKE '%${query}%'`;
+    const getQuestionQuery = `SELECT q.question_id as questionId, ul.username AS authorUsername,up.name as authorName,up.profile_picture as authorImage,q.title AS title,q.body AS summery , q.tags AS tags,q.image AS image,q.repo as repo,q.creation_datetime as creation_datetime FROM questions q INNER JOIN user_login ul ON q.user_id = ul.id INNER JOIN user_profile up ON up.user_id=q.user_id WHERE q.title LIKE '%${query}%' LIMIT 6`;
     const getQuestion= await executeQuery(getQuestionQuery);
     if(getQuestion.length === 0){
       res.json([]);
