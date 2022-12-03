@@ -40,6 +40,7 @@ const addQuestion = async (req, res) => {
         return;
       }
       const imageUpload = await uploadToAws(req.file);
+      fs.unlinkSync(req.file.path);
       console.log(imageUpload.Location);
       const imagePath = imageUpload.Location;
       if (!title || title.length === 0 || !summery || summery.length === 0) {
